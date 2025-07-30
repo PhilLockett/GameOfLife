@@ -26,13 +26,7 @@ package phillockett65.GameOfLife;
 
 import java.util.ArrayList;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.StrokeLineCap;
 import javafx.stage.Stage;
 import phillockett65.Debug.Debug;
 
@@ -41,9 +35,14 @@ public class Model {
     // Debug delta used to adjust the local logging level.
     private static final int DD = 0;
 
+    private static final int MIN_SPEED = -3;
+    private static final int MAX_SPEED = 3;
+    private static final int INIT_SPEED = -1;
+    private static final int MIN_SIZE = 3;
+    private static final int MAX_SIZE = 30;
+    private static final int INIT_SIZE = 10;
+
     public static final String DATAFILE = "Settings.ser";
-    public static final double TOPBARHEIGHT = 32.0;
-    private static final String TOPBARICON = "top-bar-icon";
 
     private static Model model = new Model();
     private Stage stage;
@@ -55,46 +54,6 @@ public class Model {
      * General support code.
      */
 
-    /**
-     * Convert a real colour value (0.0 to 1.0) to an int (0 too 256).
-     * @param value to convert.
-     * @return converted value.
-     */
-    private int colourRealToInt(double value) {
-        return (int)(value * 256);
-    }
-
- 
-    /**
-     * Builds the cancel button as a Pane.
-     * Does not include the mouse click handler.
-     * @return the Pane that represents the cancel button.
-     */
-    public static Pane buildCancelButton() {
-        final double iconSize = TOPBARHEIGHT;
-        final double cancelPadding = 0.3;
-
-        Pane cancel = new Pane();
-        cancel.setPrefWidth(iconSize);
-        cancel.setPrefHeight(iconSize);
-        cancel.getStyleClass().add(TOPBARICON);
-
-        double a = iconSize * cancelPadding;
-        double b = iconSize - a;
-        Line line1 = new Line(a, a, b, b);
-        line1.setStroke(Color.WHITE);
-        line1.setStrokeWidth(4.0);
-        line1.setStrokeLineCap(StrokeLineCap.ROUND);
-
-        Line line2 = new Line(a, b, b, a);
-        line2.setStroke(Color.WHITE);
-        line2.setStrokeWidth(4.0);
-        line2.setStrokeLineCap(StrokeLineCap.ROUND);
-
-        cancel.getChildren().addAll(line1, line2);
-
-        return cancel;
-    }
 
     /**
      * Add or remove the unfocussed style from the given pane object.
@@ -140,8 +99,7 @@ public class Model {
         Debug.trace(DD, "Model initialized.");
 
         initializeCheckBoxes();
-        initializeSelections();
-        initializeSpinners();
+        initializeControls();
         initializeStatusLine();
     }
 
@@ -187,13 +145,9 @@ public class Model {
         }
         setBirthCheck(2, true);
 
-        setInteger(10);
-        setDouble(1.0);
-        setDay("Tuesday");
-
-        setMonth("July");
-        setBestDay("New Year");
-        setMyColour(Color.RED);
+        initSpeed();
+        initSize();
+        initPlay();
     }
 
 
@@ -228,6 +182,31 @@ public class Model {
     public void setLiveCheck(int index, boolean state) { liveCheck.set(index, state); }
     public boolean isLiveCheck(int index) { return liveCheck.get(index); }
 
+    public String getLiveCheckString() {
+        ArrayList<Integer> checks = new ArrayList<Integer>(9);
+        for (int i = 1; i <= 8; ++i) {
+            if (isLiveCheck(i))
+                checks.add(i);
+        }
+
+        if (checks.size() == 0)
+            return "At least one Live checkbox must be selected.";
+
+        String output = "";
+        if (checks.size() == 1) {
+            output += checks.get(0);
+        } else {
+            output += checks.get(0);
+            final int max = checks.size()-1;
+            for (int i = 1; i < max; ++i) {
+                output += ", " + checks.get(i);
+            }
+            output += " or " + checks.get(max);
+        }
+
+        return "Must have " + output + " living neighbours to stay alive.";
+    }
+
     private ArrayList<Boolean> birthCheck;
 
     ArrayList<Boolean> getBirthChecks() { return birthCheck; }
@@ -235,6 +214,31 @@ public class Model {
 
     public void setBirthCheck(int index, boolean state) { birthCheck.set(index, state); }
     public boolean isBirthCheck(int index) { return birthCheck.get(index); }
+
+    public String getBirthCheckString() {
+        ArrayList<Integer> checks = new ArrayList<Integer>(9);
+        for (int i = 1; i <= 8; ++i) {
+            if (isBirthCheck(i))
+                checks.add(i);
+        }
+
+        if (checks.size() == 0)
+            return "At least one Birth checkbox must be selected.";
+
+        String output = "";
+        if (checks.size() == 1) {
+            output += checks.get(0);
+        } else {
+            output += checks.get(0);
+            final int max = checks.size()-1;
+            for (int i = 1; i < max; ++i) {
+                output += ", " + checks.get(i);
+            }
+            output += " or " + checks.get(max);
+        }
+
+        return "Must have " + output + " living neighbours to be born.";
+    }
 
 
     /**
@@ -255,114 +259,92 @@ public class Model {
 
 
     /************************************************************************
-     * Support code for "Selections" panel.
+     * Support code for "Controls" panel.
      */
 
-    private String month = "";
-    private ObservableList<String> monthList = FXCollections.observableArrayList();
+    private int speed = INIT_SPEED;
 
-    private String bestDay = "";
-    private ObservableList<String> bestDayList = FXCollections.observableArrayList();
+    public int getSpeed() { return speed; }
+    public void setSpeed(int value) { speed = value; }
+    public void initSpeed() { speed = INIT_SPEED; }
 
-    private Color myColour = Color.WHITE;
-
-    public ObservableList<String> getMonthList() { return monthList; }
-    public void setMonth(String value) { month = value; }
-    public String getMonth() { return month; }
-
-    public ObservableList<String> getBestDayList() { return bestDayList; }
-    public void setBestDay(String value) { bestDay = value; }
-    public String getBestDay() { return bestDay; }
-
-    public Color getMyColour() { return myColour; }
-    public void setMyColour(Color colour) { myColour = colour; }
+    public boolean isMinSpeed() { return getSpeed() == MIN_SPEED; }
+    public boolean isMaxSpeed() { return getSpeed() == MAX_SPEED; }
 
     /**
-     * @return myColour as a displayable RGB string.
+     * Increment speed if possible.
+     * @return true if speed is at maximum value, false otherwise.
      */
-    public String getMyColourString() {
-        return String.format("rgb(%d, %d, %d)",
-                colourRealToInt(myColour.getRed()),
-                colourRealToInt(myColour.getGreen()),
-                colourRealToInt(myColour.getBlue()));
+    public boolean incSpeed() {
+        if (isMaxSpeed()) return true;
+
+        ++speed;
+
+        return isMaxSpeed();
     }
 
     /**
-     * Initialize "Selections" panel.
+     * Decrement speed if possible.
+     * @return true if speed is at minimum value, false otherwise.
      */
-    private void initializeSelections() {
-        bestDayList.add("New Year");
-        bestDayList.add("Good Friday");
-        bestDayList.add("Easter Monday");
-        bestDayList.add("Victoria Day");
-        bestDayList.add("Canada Day");
-        bestDayList.add("Civic Holiday");
-        bestDayList.add("Labour Day");
-        bestDayList.add("Thanksgiving Day");
-        bestDayList.add("Remembrance Day");
-        bestDayList.add("Christmas Day");
-        bestDayList.add("Boxing Day");
+    public boolean decSpeed() {
+        if (isMinSpeed()) return true;
 
-        monthList.addAll("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
+        --speed;
+
+        return isMinSpeed();
     }
 
+    private int size = INIT_SIZE;
 
+    public int getSize() { return size; }
 
-    /************************************************************************
-     * Support code for "Spinners" panel.
-     */
+    public void setSize(int value) { size = value; }
+    public void initSize() { size = INIT_SIZE; }
 
-    private SpinnerValueFactory<Integer> integerSVF;
-
-    private SpinnerValueFactory<Double>  doubleSVF;
-
-    private SpinnerValueFactory<String>  daySVF;
-
-    private ObservableList<String> daysOfWeekList = FXCollections.observableArrayList();
-
-    public SpinnerValueFactory<Integer> getIntegerSVF() { return integerSVF; }
-    public SpinnerValueFactory<Double> getDoubleSVF() { return doubleSVF; }
-    public SpinnerValueFactory<String> getDaySpinnerSVF() { return daySVF; }
-
-    public int getInteger() { return integerSVF.getValue(); }
-    public double getDouble() { return doubleSVF.getValue(); }
-    public String getDay() { return daySVF.getValue(); }
-    public void setInteger(int value) { integerSVF.setValue(value); }
-    public void setDouble(double value) { doubleSVF.setValue(value); }
-    public void setDay(String value) { daySVF.setValue(value); }
+    public boolean isMinSize() { return getSize() == MIN_SIZE; }
+    public boolean isMaxSize() { return getSize() == MAX_SIZE; }
 
     /**
-     * Selected Integer has changed, so synchronize values.
+     * Increment size if possible.
+     * @return true if size is at maximum value, false otherwise.
      */
-    public void syncInteger() {  }
+    public boolean incSize() {
+        if (isMaxSize()) return true;
+
+        ++size;
+
+        return isMaxSize();
+    }
 
     /**
-     * Selected Double has changed, so synchronize values.
+     * Decrement size if possible.
+     * @return true if size is at minimum value, false otherwise.
      */
-    public void syncDouble() {  }
+    public boolean decSize() {
+        if (isMinSize()) return true;
+
+        --size;
+
+        return isMinSize();
+    }
+
+    private boolean play = false;
+
+    public boolean isPlay() { return play; }
+    public void initPlay() { play = false; }
 
     /**
-     * Selected Day has changed, so synchronize values.
+     * Toggle the current state of play.
+     * @return play;
      */
-    public void syncDay() {  }
+    public boolean togglePlay() { play = !play; return isPlay(); }
 
 
     /**
-     * Initialize "Spinners" panel.
+     * Initialize "Controls" panel.
      */
-    private void initializeSpinners() {
-        integerSVF = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 10);
-        doubleSVF = new SpinnerValueFactory.DoubleSpinnerValueFactory(1.0, 20.0, 1.0, 0.2);
-
-        daysOfWeekList.add("Monday");
-        daysOfWeekList.add("Tuesday");
-        daysOfWeekList.add("Wednesday");
-        daysOfWeekList.add("Thursday");
-        daysOfWeekList.add("Friday");
-        daysOfWeekList.add("Saturday");
-        daysOfWeekList.add("Sunday");
-
-        daySVF = new SpinnerValueFactory.ListSpinnerValueFactory<String>(daysOfWeekList);
+    private void initializeControls() {
     }
 
 

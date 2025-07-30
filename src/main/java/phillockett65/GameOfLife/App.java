@@ -25,6 +25,8 @@ package phillockett65.GameOfLife;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -34,6 +36,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import java.io.IOException;
+
 
 /**
  * JavaFX App
@@ -57,8 +60,22 @@ public class App extends Application {
         stage.setTitle("Game Of Life 1.0");
         stage.setOnCloseRequest(e -> Platform.exit());
         // stage.resizableProperty().setValue(false);
-        // stage.initStyle(StageStyle.UNDECORATED);
+        stage.initStyle(StageStyle.DECORATED);
         stage.setScene(scene);
+
+        stage.setMinWidth(300); // 284
+        stage.setMinHeight(550);// 511
+
+        scene.widthProperty().addListener(new ChangeListener<Number>() {
+            @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
+                System.out.println("Width: " + newSceneWidth);
+            }
+        });
+        scene.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
+                System.out.println("Height: " + newSceneHeight);
+            }
+        });
 
         stage.focusedProperty().addListener((obs, oldVal, newVal) -> 
             controller.setFocus(newVal));

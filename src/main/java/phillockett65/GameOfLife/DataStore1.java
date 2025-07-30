@@ -40,13 +40,17 @@ public class DataStore1 extends DataStore {
     // Debug delta used to adjust the local logging level.
     private static final int DD = 0;
 
-    private double mainX;
-    private double mainY;
+    private Double mainX;
+    private Double mainY;
+
+    private Double width;
+    private Double height;
 
     private ArrayList<Boolean> liveCheck;
     private ArrayList<Boolean> birthCheck;
 
-
+    private Integer speed;
+    private Integer size;
 
 
     /************************************************************************
@@ -73,8 +77,14 @@ public class DataStore1 extends DataStore {
         mainX = model.getStage().getX();
         mainY = model.getStage().getY();
 
+        width = model.getStage().getWidth();
+        height = model.getStage().getHeight();
+
         liveCheck = model.getLiveChecks();
         birthCheck = model.getBirthChecks();
+
+        speed = model.getSpeed();
+        size = model.getSize();
 
         return success;
     }
@@ -90,8 +100,14 @@ public class DataStore1 extends DataStore {
         model.getStage().setX(mainX);
         model.getStage().setY(mainY);
 
+        model.getStage().setWidth(width);
+        model.getStage().setHeight(height);
+
         model.setLiveChecks(liveCheck);
         model.setBirthChecks(birthCheck);
+
+        model.setSpeed(speed);
+        model.setSize(size);
 
         return success;
     }
@@ -175,8 +191,10 @@ public class DataStore1 extends DataStore {
         Debug.info(DD, "liveCheck = " + liveCheck);
         Debug.info(DD, "birthCheck = " + birthCheck);
         Debug.info(DD, "");
+        Debug.info(DD, "speed = " + speed);
+        Debug.info(DD, "size = " + size);
+        Debug.info(DD, "");
     }
 
 
 }
-

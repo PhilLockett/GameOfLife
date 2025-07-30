@@ -24,6 +24,8 @@
  */
 package phillockett65.GameOfLife;
 
+import java.util.ArrayList;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
@@ -49,6 +51,9 @@ public class PrimaryController {
      * General support code.
      */
 
+    private int idToIndex(String id) {
+        return Integer.valueOf(id.substring(1));
+    }
 
 
      /************************************************************************
@@ -73,7 +78,7 @@ public class PrimaryController {
         model.initialize();
 
         initializeCheckBoxes();
-        initializeSelections();
+        initializeControls();
         initializeEarthCanvas();
     }
 
@@ -102,32 +107,23 @@ public class PrimaryController {
      * in the initialisation.
      */
     public void syncUI() {
-        live1CheckBox.setSelected(model.isLiveCheck(1));
-        live2CheckBox.setSelected(model.isLiveCheck(2));
-        live3CheckBox.setSelected(model.isLiveCheck(3));
-        live4CheckBox.setSelected(model.isLiveCheck(4));
-        live5CheckBox.setSelected(model.isLiveCheck(5));
-        live6CheckBox.setSelected(model.isLiveCheck(6));
-        live7CheckBox.setSelected(model.isLiveCheck(7));
-        live8CheckBox.setSelected(model.isLiveCheck(8));
-        birth1CheckBox.setSelected(model.isBirthCheck(1));
-        birth2CheckBox.setSelected(model.isBirthCheck(2));
-        birth3CheckBox.setSelected(model.isBirthCheck(3));
-        birth4CheckBox.setSelected(model.isBirthCheck(4));
-        birth5CheckBox.setSelected(model.isBirthCheck(5));
-        birth6CheckBox.setSelected(model.isBirthCheck(6));
-        birth7CheckBox.setSelected(model.isBirthCheck(7));
-        birth8CheckBox.setSelected(model.isBirthCheck(8));
+        for (int i = 0; i < liveCheckBoxes.size(); ++i) {
+            liveCheckBoxes.get(i).setSelected(model.isLiveCheck(i + 1));
+        }
+        for (int i = 0; i < birthCheckBoxes.size(); ++i) {
+            birthCheckBoxes.get(i).setSelected(model.isBirthCheck(i + 1));
+        }
+        updateLiveTooltips();
+        updateBirthTooltips();
     }
-
-
-
 
 
 
     /************************************************************************
      * Support code for "Check Boxes" panel.
      */
+
+    private ArrayList<CheckBox> liveCheckBoxes;
 
     @FXML
     private CheckBox live1CheckBox;
@@ -153,6 +149,17 @@ public class PrimaryController {
     @FXML
     private CheckBox live8CheckBox;
 
+    @FXML
+    void liveCheckboxActionPerformed(ActionEvent event) {
+        CheckBox checkBox = (CheckBox)event.getSource();
+        int id = idToIndex(checkBox.getId());
+        Debug.info(DD, "liveCheckboxActionPerformed() " + id);
+        model.setLiveCheck(id, checkBox.isSelected());
+        updateLiveTooltips();
+    }
+
+
+    private ArrayList<CheckBox> birthCheckBoxes;
 
     @FXML
     private CheckBox birth1CheckBox;
@@ -178,20 +185,74 @@ public class PrimaryController {
     @FXML
     private CheckBox birth8CheckBox;
 
+    @FXML
+    void birthCheckboxActionPerformed(ActionEvent event) {
+        CheckBox checkBox = (CheckBox)event.getSource();
+        int id = idToIndex(checkBox.getId());
+        Debug.info(DD, "birthCheckboxActionPerformed() " + id);
+        model.setBirthCheck(id, checkBox.isSelected());
+        updateBirthTooltips();
+    }
+
+
+    private void updateLiveTooltips() {
+        for (int i = 0; i < liveCheckBoxes.size(); ++i) {
+            String tip = model.getLiveCheckString();
+            liveCheckBoxes.get(i).setTooltip(new Tooltip(tip));
+        }
+    }
+
+    private void updateBirthTooltips() {
+        for (int i = 0; i < birthCheckBoxes.size(); ++i) {
+            String tip = model.getBirthCheckString();
+            birthCheckBoxes.get(i).setTooltip(new Tooltip(tip));
+        }
+    }
 
     /**
      * Initialize "Check Boxes" panel.
      */
     private void initializeCheckBoxes() {
-        live1CheckBox.setTooltip(new Tooltip("First check box"));
-        live2CheckBox.setTooltip(new Tooltip("Second check box"));
-        live3CheckBox.setTooltip(new Tooltip("Third check box"));
+        liveCheckBoxes = new ArrayList<CheckBox>(8);
+        liveCheckBoxes.add(live1CheckBox);
+        liveCheckBoxes.add(live2CheckBox);
+        liveCheckBoxes.add(live3CheckBox);
+        liveCheckBoxes.add(live4CheckBox);
+        liveCheckBoxes.add(live5CheckBox);
+        liveCheckBoxes.add(live6CheckBox);
+        liveCheckBoxes.add(live7CheckBox);
+        liveCheckBoxes.add(live8CheckBox);
+
+        updateLiveTooltips();
+        for (int i = 0; i < liveCheckBoxes.size(); ++i) {
+            String id = "L" + (i+1);
+            CheckBox checkBox = liveCheckBoxes.get(i);
+            checkBox.setId(id);
+        }
+
+        birthCheckBoxes = new ArrayList<CheckBox>(8);
+        birthCheckBoxes.add(birth1CheckBox);
+        birthCheckBoxes.add(birth2CheckBox);
+        birthCheckBoxes.add(birth3CheckBox);
+        birthCheckBoxes.add(birth4CheckBox);
+        birthCheckBoxes.add(birth5CheckBox);
+        birthCheckBoxes.add(birth6CheckBox);
+        birthCheckBoxes.add(birth7CheckBox);
+        birthCheckBoxes.add(birth8CheckBox);
+
+        updateBirthTooltips();
+        for (int i = 0; i < birthCheckBoxes.size(); ++i) {
+            String id = "B" + (i+1);
+            CheckBox checkBox = birthCheckBoxes.get(i);
+            checkBox.setId(id);
+        }
+
     }
 
 
 
     /************************************************************************
-     * Support code for "Selections" panel.
+     * Support code for "Controls" panel.
      */
 
     @FXML
@@ -215,25 +276,33 @@ public class PrimaryController {
 
     @FXML
     void fasterButtonActionPerformed(ActionEvent event) {
-        Debug.info(DD, "fasterButtonActionPerformed()");
+        fasterButton.setDisable(model.incSpeed());
+        slowerButton.setDisable(false);
+        Debug.info(DD, "fasterButtonActionPerformed() " + model.getSpeed());
 
     }
 
     @FXML
     void slowerButtonActionPerformed(ActionEvent event) {
-        Debug.info(DD, "slowerButtonActionPerformed()");
+        slowerButton.setDisable(model.decSpeed());
+        fasterButton.setDisable(false);
+        Debug.info(DD, "slowerButtonActionPerformed() " + model.getSpeed());
 
     }
 
     @FXML
     void biggerButtonActionPerformed(ActionEvent event) {
-        Debug.info(DD, "biggerButtonActionPerformed()");
+        biggerButton.setDisable(model.incSize());
+        smallerButton.setDisable(false);
+        Debug.info(DD, "biggerButtonActionPerformed() " + model.getSize());
 
     }
 
     @FXML
     void smallerButtonActionPerformed(ActionEvent event) {
-        Debug.info(DD, "smallerButtonActionPerformed()");
+        smallerButton.setDisable(model.decSize());
+        biggerButton.setDisable(false);
+        Debug.info(DD, "smallerButtonActionPerformed() " + model.getSize());
 
     }
 
@@ -245,8 +314,13 @@ public class PrimaryController {
 
     @FXML
     void playButtonActionPerformed(ActionEvent event) {
-        Debug.info(DD, "playButtonActionPerformed()");
+        model.togglePlay();
+        Debug.info(DD, "playButtonActionPerformed() " + model.isPlay());
 
+        if (model.isPlay())
+            playButton.setText("Pause");
+        else
+            playButton.setText("Play");
     }
 
     /**
@@ -258,9 +332,9 @@ public class PrimaryController {
     }
 
     /**
-     * Initialize "Selections" panel.
+     * Initialize "Controls" panel.
      */
-    private void initializeSelections() {
+    private void initializeControls() {
         clearDataButton.setTooltip(new Tooltip("Caution! This irreversible action will reset the form data to default values"));
     }
 
@@ -274,7 +348,7 @@ public class PrimaryController {
     private Canvas earth;
 
     /**
-     * Initialize "Selections" panel.
+     * Initialize "Earth" canvas.
      */
     private void initializeEarthCanvas() {
     }
