@@ -80,9 +80,9 @@ public class App extends Application {
         stage.focusedProperty().addListener((obs, oldVal, newVal) -> 
             controller.setFocus(newVal));
 
+        controller.init(stage, scene);
+        
         stage.show();
-
-        controller.init(stage);
     }
 
     @Override
