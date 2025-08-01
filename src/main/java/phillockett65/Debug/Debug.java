@@ -65,7 +65,7 @@ public class Debug {
     private static final int ALL = 7;
 
     // Debugging level for entire application.
-    private static final int LEVEL = ALL;
+    private static final int LEVEL = MINOR;
 
 
 

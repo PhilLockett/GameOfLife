@@ -25,14 +25,20 @@
 package phillockett65.GameOfLife;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
+import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import phillockett65.Debug.Debug;
 
@@ -41,7 +47,14 @@ public class PrimaryController {
     // Debug delta used to adjust the local logging level.
     private static final int DD = 0;
 
+    private static final Color baseColor = Color.WHITE;
+    private static final Color contrastColor = Color.rgb(220,220,255);
+    private static final Color livingColor = Color.CRIMSON;
+
     private Model model;
+    private Group group;
+    private Canvas canvas;
+    private GraphicsContext gc;
 
     @FXML
     private VBox root;
@@ -88,18 +101,21 @@ public class PrimaryController {
      * 
      * @param mainController used to call the centralized controller.
      */
-    public void init(Stage primaryStage) {
+    public void init(Stage stage, Scene scene) {
         Debug.trace(DD, "PrimaryController init.");
-        model.init(primaryStage, this);
+        model.init(stage, scene, this);
         syncUI();
 
     }
+
 
     /**
      * Synchronise all controls with the model. This should be the last step 
      * in the initialisation.
      */
     public void syncUI() {
+        Debug.trace(DD, "syncUI()");
+
         for (int i = 0; i < liveCheckBoxes.size(); ++i) {
             liveCheckBoxes.get(i).setSelected(model.isLiveCheck(i + 1));
         }
@@ -108,6 +124,7 @@ public class PrimaryController {
         }
         updateLiveTooltips();
         updateBirthTooltips();
+        syncEarthCanvas();
     }
 
 
@@ -146,7 +163,7 @@ public class PrimaryController {
     void liveCheckboxActionPerformed(ActionEvent event) {
         CheckBox checkBox = (CheckBox)event.getSource();
         int id = idToIndex(checkBox.getId());
-        Debug.info(DD, "liveCheckboxActionPerformed() " + id);
+        Debug.trace(DD, "liveCheckboxActionPerformed() " + id);
         model.setLiveCheck(id, checkBox.isSelected());
         updateLiveTooltips();
     }
@@ -182,7 +199,7 @@ public class PrimaryController {
     void birthCheckboxActionPerformed(ActionEvent event) {
         CheckBox checkBox = (CheckBox)event.getSource();
         int id = idToIndex(checkBox.getId());
-        Debug.info(DD, "birthCheckboxActionPerformed() " + id);
+        Debug.trace(DD, "birthCheckboxActionPerformed() " + id);
         model.setBirthCheck(id, checkBox.isSelected());
         updateBirthTooltips();
     }
@@ -261,59 +278,99 @@ public class PrimaryController {
     private Button smallerButton;
 
     @FXML
+    private Button upButton;
+
+    @FXML
+    private Button downButton;
+
+    @FXML
+    private Button leftButton;
+
+    @FXML
+    private Button rightButton;
+
+    @FXML
     private Button clearDataButton;
 
     @FXML
     private Button playButton;
 
-
     @FXML
     void fasterButtonActionPerformed(ActionEvent event) {
         fasterButton.setDisable(model.incSpeed());
         slowerButton.setDisable(false);
-        Debug.info(DD, "fasterButtonActionPerformed() " + model.getSpeed());
-
+        Debug.trace(DD, "fasterButtonActionPerformed() " + model.getSpeed());
     }
 
     @FXML
     void slowerButtonActionPerformed(ActionEvent event) {
         slowerButton.setDisable(model.decSpeed());
         fasterButton.setDisable(false);
-        Debug.info(DD, "slowerButtonActionPerformed() " + model.getSpeed());
-
+        Debug.trace(DD, "slowerButtonActionPerformed() " + model.getSpeed());
     }
 
     @FXML
     void biggerButtonActionPerformed(ActionEvent event) {
         biggerButton.setDisable(model.incSize());
         smallerButton.setDisable(false);
-        Debug.info(DD, "biggerButtonActionPerformed() " + model.getSize());
-
+        Debug.trace(DD, "biggerButtonActionPerformed() " + model.getSize());
+        syncEarthCanvas();
     }
 
     @FXML
     void smallerButtonActionPerformed(ActionEvent event) {
         smallerButton.setDisable(model.decSize());
         biggerButton.setDisable(false);
-        Debug.info(DD, "smallerButtonActionPerformed() " + model.getSize());
+        Debug.trace(DD, "smallerButtonActionPerformed() " + model.getSize());
+        syncEarthCanvas();
+    }
 
+    @FXML
+    void upButtonActionPerformed(ActionEvent event) {
+        model.moveUp();
+        Debug.trace(DD, "upButtonActionPerformed() " + model.getXOffset() + " " + model.getYOffset());
+        syncEarthCanvas();
+    }
+
+    @FXML
+    void downButtonActionPerformed(ActionEvent event) {
+        model.moveDown();
+        Debug.trace(DD, "downButtonActionPerformed() " + model.getXOffset() + " " + model.getYOffset());
+        syncEarthCanvas();
+    }
+
+    @FXML
+    void leftButtonActionPerformed(ActionEvent event) {
+        model.moveLeft();
+        Debug.trace(DD, "leftButtonActionPerformed() " + model.getXOffset() + " " + model.getYOffset());
+        syncEarthCanvas();
+    }
+
+    @FXML
+    void rightButtonActionPerformed(ActionEvent event) {
+        model.moveRight();
+        Debug.trace(DD, "rightButtonActionPerformed() " + model.getXOffset() + " " + model.getYOffset());
+        syncEarthCanvas();
     }
 
     @FXML
     private void clearDataButtonActionPerformed(ActionEvent event) {
-        Debug.info(DD, "clearDataButtonActionPerformed()");
+        Debug.trace(DD, "clearDataButtonActionPerformed()");
         clearData();
     }
 
     @FXML
     void playButtonActionPerformed(ActionEvent event) {
         model.togglePlay();
-        Debug.info(DD, "playButtonActionPerformed() " + model.isPlay());
+        Debug.trace(DD, "playButtonActionPerformed() " + model.isPlay());
 
-        if (model.isPlay())
+        if (model.isPlay()) {
             playButton.setText("Pause");
-        else
+            timer.start();
+        } else {
             playButton.setText("Play");
+            timer.stop();
+        }
     }
 
     /**
@@ -338,11 +395,135 @@ public class PrimaryController {
      */
 
     @FXML
-    private Canvas earth;
+    private VBox earth;
+
+    private void setFill(int x, int y, boolean state) {
+        if (state) {
+            gc.setFill(livingColor);
+        } else if ((x + y) % 2 == 0) {
+            gc.setFill(contrastColor);
+        } else {
+            gc.setFill(baseColor);
+        }
+    }
+
+    private void setCell(int x, int y, boolean state) {
+
+        // Debug.trace(DD, "setCell() " + x + " " + y + " " + state);
+        setFill(x, y, state);
+
+        final int size = model.getSize();
+        final int xPos = model.getXPosition(x);
+        final int yPos = model.getYPosition(y);
+        gc.fillRect(xPos, yPos, size, size);
+    }
+
+    public void syncEarthCanvas() {
+
+        final double width = model.getEarthWidth();
+        final double height = model.getEarthHeight();
+        Debug.trace(DD, "syncEarthCanvas() " + width + " " + height);
+
+        final int xOrigin = 0;
+        final int yOrigin = 0;
+
+        canvas.setLayoutX(xOrigin);
+        canvas.setLayoutY(yOrigin);
+        canvas.setWidth(width);
+        canvas.setHeight(height);
+
+        gc.setFill(baseColor);
+        gc.fillRect(xOrigin, yOrigin, width, height);
+
+        final int size = model.getSize();
+        final int xSquares = (int)width / size;
+        final int ySquares = (int)height / size;
+
+        for (int yIndex = 0; yIndex <= ySquares; ++yIndex) {
+            int y = model.getY(yIndex);
+            for (int xIndex = 0; xIndex <= xSquares; ++xIndex) {
+                int x = model.getX(xIndex);
+                final boolean state = model.isLiving(x, y);
+                setCell(x, y, state);
+            }
+        }
+    }
+
+    public void updateEarthCanvas(LinkedList<Integer> toggles) {
+        Debug.trace(DD, "updateEarthCanvas() ");
+
+        for (Integer pos : toggles) {
+            final int x = Model.extractX(pos);
+            final int y = Model.extractY(pos);
+            final boolean state = model.isLiving(x, y);
+            setCell(x, y, state);
+        }
+    }
+
+    private MyTimer timer;
+
+    private class MyTimer extends AnimationTimer {
+        private long last = 0;
+        @Override
+        public void handle(long now) {
+            final long delta = now - last;
+            if (delta > model.getDelta()) {
+                last = now;
+ 
+                LinkedList<Integer> toggles = model.nextGeneration();
+                updateEarthCanvas(toggles);
+
+                Debug.trace(DD, "boom  " + model.getDelta());
+            }
+        }
+    }
+
+    private void setCellFromMouseClick(int xPos, int yPos) {
+
+        final int size = model.getSize();
+
+        final int x = model.getX(xPos / size);
+        final int y = model.getY(yPos / size);
+        final boolean state = model.toggleSelected(x, y);
+        setFill(x, y, state);
+
+        Debug.trace(DD, "setCellFromMouseClick() " + x + " " + y + " " + state);
+
+        final int xPosCell = model.getXPosition(x);
+        final int yPosCell = model.getYPosition(y);
+        gc.fillRect(xPosCell, yPosCell, size, size);
+    }
 
     /**
      * Initialize "Earth" canvas.
      */
     private void initializeEarthCanvas() {
+
+        timer = new MyTimer();
+
+        double width = 200;
+        double height = 300;
+
+        group = new Group();
+
+        canvas = new Canvas(width, height);
+
+        canvas.setOnMouseClicked(event -> {
+            final int xPos = (int)(event.getX());
+            final int yPos = (int)(event.getY());
+            Debug.trace(DD, "setOnMouseClicked() " + xPos + " " + yPos);
+
+            setCellFromMouseClick(xPos, yPos);
+        });
+
+        group.getChildren().add(canvas);
+
+        // Grab the graphics context while we are here.
+        gc = canvas.getGraphicsContext2D();
+        gc.setFill(Color.GRAY);
+        gc.fillRect(0, 0, width, height);
+
+        earth.getChildren().add(group);
+
     }
 }

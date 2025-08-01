@@ -25,8 +25,9 @@
 package phillockett65.GameOfLife;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
-import javafx.scene.layout.Pane;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import phillockett65.Debug.Debug;
 
@@ -35,17 +36,26 @@ public class Model {
     // Debug delta used to adjust the local logging level.
     private static final int DD = 0;
 
+    private static final long SECOND = 1000000000L;
     private static final int MIN_SPEED = -3;
     private static final int MAX_SPEED = 3;
     private static final int INIT_SPEED = -1;
+
     private static final int MIN_SIZE = 3;
     private static final int MAX_SIZE = 30;
     private static final int INIT_SIZE = 10;
+
+    private static final int MAX_XPOS = 1000;
+    private static final int INIT_XPOS = 0;
+
+    private static final int MAX_YPOS = 1000;
+    private static final int INIT_YPOS = 0;
 
     public static final String DATAFILE = "Settings.ser";
 
     private static Model model = new Model();
     private Stage stage;
+    private Scene scene;
     private PrimaryController controller;
 
 
@@ -54,6 +64,9 @@ public class Model {
      * General support code.
      */
 
+    static public int encode(int x, int y) { return (x << 16) | y; }
+    static public int extractX(int v) { return (v >> 16) & 0xFFFF; }
+    static public int extractY(int v) { return v & 0xFFFF; }
 
 
     /************************************************************************
@@ -90,16 +103,18 @@ public class Model {
      * Called by the controller after the stage has been set. Completes any 
      * initialization dependent on other components being initialized.
      */
-    public void init(Stage primaryStage, PrimaryController primaryController) {
+    public void init(Stage primaryStage, Scene primaryScene, PrimaryController primaryController) {
         Debug.trace(DD, "Model init.");
         
         stage = primaryStage;
+        scene = primaryScene;
         controller = primaryController;
         if (!readData())
             defaultSettings();
     }
 
     public Stage getStage() { return stage; }
+    public Scene getScene() { return scene; }
     public String getTitle() { return stage.getTitle(); }
     public PrimaryController getController() { return controller; }
 
@@ -245,11 +260,19 @@ public class Model {
      * Support code for "Controls" panel.
      */
 
-    private int speed = INIT_SPEED;
+    private int speed = INIT_SPEED;     // Actually a delta time denominator.
 
     public int getSpeed() { return speed; }
     public void setSpeed(int value) { speed = value; }
     public void initSpeed() { speed = INIT_SPEED; }
+
+    public long getDelta() { 
+        if (speed < 0) {
+            return SECOND >> -speed;
+        }
+
+        return SECOND << speed;
+    }
 
     public boolean isMinSpeed() { return getSpeed() == MIN_SPEED; }
     public boolean isMaxSpeed() { return getSpeed() == MAX_SPEED; }
@@ -258,7 +281,7 @@ public class Model {
      * Increment speed if possible.
      * @return true if speed is at maximum value, false otherwise.
      */
-    public boolean incSpeed() {
+    public boolean decSpeed() {
         if (isMaxSpeed()) return true;
 
         ++speed;
@@ -270,7 +293,7 @@ public class Model {
      * Decrement speed if possible.
      * @return true if speed is at minimum value, false otherwise.
      */
-    public boolean decSpeed() {
+    public boolean incSpeed() {
         if (isMinSpeed()) return true;
 
         --speed;
@@ -312,6 +335,20 @@ public class Model {
         return isMinSize();
     }
 
+    private int xOff = INIT_XPOS;
+    public int getXOffset() { return xOff; }
+    public int getX(int x) { return (x - xOff + MAX_XPOS) % MAX_XPOS; }
+    public int getXPosition(int x) { return ((xOff + x) % MAX_XPOS) * size; }
+    public int moveLeft() { xOff = (xOff - 1 + MAX_XPOS) % MAX_XPOS; return xOff; }
+    public int moveRight() { xOff = (xOff + 1) % MAX_XPOS; return xOff; }
+
+    private int yOff = INIT_YPOS;
+    public int getYOffset() { return yOff; }
+    public int getY(int y) { return (y - yOff + MAX_YPOS) % MAX_YPOS; }
+    public int getYPosition(int y) { return ((yOff + y) % MAX_YPOS) * size; }
+    public int moveUp() { yOff = (yOff - 1 + MAX_YPOS) % MAX_YPOS; return yOff; }
+    public int moveDown() { yOff = (yOff + 1) % MAX_YPOS; return yOff; }
+
     private boolean play = false;
 
     public boolean isPlay() { return play; }
@@ -336,10 +373,169 @@ public class Model {
      * Support code for "Earth" canvas.
      */
 
+    private byte[][] landscape;
+    public double getEarthWidth() {
+        double width = getScene().getWidth();
+        
+        return width - 204;
+    }
+
+    public double getEarthHeight() {
+        double height = model.getScene().getHeight();
+        
+        return height;
+    }
+
+    private int livingNeighbours(final int l, final int x, final int r, final int u, final int y, final int d) {
+        int count = 0;
+        // Debug.info(DD, "livingNeighboursSafe(" + x + ", " + y + ")");
+
+        if (isLiving(l, u)) ++count;
+        if (isLiving(l, y)) ++count;
+        if (isLiving(l, d)) ++count;
+
+        if (isLiving(x, u)) ++count;
+        if (isLiving(x, d)) ++count;
+
+        if (isLiving(r, u)) ++count;
+        if (isLiving(r, y)) ++count;
+        if (isLiving(r, d)) ++count;
+
+        // Debug.info(DD, "livingNeighboursSafe() -> " + count);
+        return count;
+    }
+
+    public void nextGenSafeX(int x, LinkedList<Integer> toggles) {
+        final int l = (x == 0) ? (MAX_XPOS-1) : x-1;
+        final int r = (x == MAX_XPOS-1) ? 0 : x+1;
+        
+        for (int y = 0; y < MAX_YPOS; ++y) {
+            final int u = (y == 0) ? (MAX_YPOS-1) : y-1;
+            final int d = (y == MAX_YPOS-1) ? 0 : y+1;
+
+            final int count = livingNeighbours(l, x, r, u, y, d);
+            final boolean living = isLiving(x, y);
+
+            if (living) {
+                if (isLiveCheck(count) != true) {
+                    toggles.add(encode(x, y));
+                }
+            } else {
+                if (isBirthCheck(count) == true) {
+                    toggles.add(encode(x, y));
+                }
+            }
+        }
+    }
+
+    public void nextGenSafeY(int y, LinkedList<Integer> toggles) {
+        final int u = (y == 0) ? (MAX_YPOS-1) : y-1;
+        final int d = (y == MAX_YPOS-1) ? 0 : y+1;
+
+        for (int x = 1; x < (MAX_XPOS-1); ++x) {
+            final int l = x-1;
+            final int r = x+1;
+
+            final int count = livingNeighbours(l, x, r, u, y, d);
+            final boolean living = isLiving(x, y);
+
+            if (living) {
+                if (isLiveCheck(count) != true) {
+                    toggles.add(encode(x, y));
+                }
+            } else {
+                if (isBirthCheck(count) == true) {
+                    toggles.add(encode(x, y));
+                }
+            }
+        }
+    }
+
+
+    public boolean isLiving(int x, int y) {
+        return ((landscape[x][y] & 0x01) == 1);
+    }
+
+    private int livingNeighbours(int x, int y) {
+        int count = 0;
+
+        final int u = y-1;
+        final int d = y+1;
+        final int l = x-1;
+        final int r = x+1;
+        if (isLiving(l, u)) ++count;
+        if (isLiving(l, y)) ++count;
+        if (isLiving(l, d)) ++count;
+
+        if (isLiving(x, u)) ++count;
+        if (isLiving(x, d)) ++count;
+
+        if (isLiving(r, u)) ++count;
+        if (isLiving(r, y)) ++count;
+        if (isLiving(r, d)) ++count;
+
+        return count;
+    }
+
+    public void toggle(int x, int y) {
+        landscape[x][y] ^= 1;
+    }
+
+    public void toggle(int pos) {
+        final int x = extractX(pos);
+        final int y = extractY(pos);
+        toggle(x, y);
+    }
+
+    public boolean toggleSelected(int x, int y) {
+        // Debug.info(DD, "toggleSelected() " + x + " " + y);
+
+        toggle(x, y);
+
+        return isLiving(x, y);
+    }
+
+    public LinkedList<Integer> nextGeneration() {
+        Debug.info(DD, "nextGeneration() ");
+        LinkedList<Integer> toggles = new LinkedList<>();
+
+        // Apply rules and create a list of all cells that should change state.
+        for (int x = 1; x < (MAX_XPOS-1); ++x) {
+            for (int y = 1; y < (MAX_YPOS-1); ++y) {
+                final int count = livingNeighbours(x, y);
+                final boolean living = isLiving(x, y);
+
+                if (living) {
+                    if (isLiveCheck(count) != true) {
+                        toggles.add(encode(x, y));
+                    }
+                } else {
+                    if (isBirthCheck(count) == true) {
+                        toggles.add(encode(x, y));
+                    }
+                }
+            }
+        }
+    
+        nextGenSafeX(0, toggles);
+        nextGenSafeY(0, toggles);
+        nextGenSafeX(MAX_XPOS-1, toggles);
+        nextGenSafeY(MAX_YPOS-1, toggles);
+
+        // Now change the state of all cells that should change state.
+        for (Integer pos : toggles) {
+            toggle(pos);
+        }
+
+        return toggles;
+    }
+
+
     /**
      * Initialize "Earth" canvas.
      */
     private void initializeEarthCanvas() {
+        landscape = new byte[MAX_XPOS][MAX_YPOS];
     }
 
 
