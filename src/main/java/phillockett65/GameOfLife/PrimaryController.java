@@ -92,14 +92,7 @@ public class PrimaryController {
         Debug.trace(DD, "PrimaryController init.");
         model.init(primaryStage, this);
         syncUI();
-    }
 
-    /**
-     * Set the styles based on the focus state.
-     * @param state is true if we have focus, false otherwise.
-     */
-    public void setFocus(boolean state) {
-        Model.styleFocus(root, "unfocussed-root", state);
     }
 
     /**

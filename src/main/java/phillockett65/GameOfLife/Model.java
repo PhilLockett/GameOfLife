@@ -55,23 +55,6 @@ public class Model {
      */
 
 
-    /**
-     * Add or remove the unfocussed style from the given pane object.
-     * @param pane to add/remove unfocussed style.
-     * @param style named in .css to define unfocussed style.
-     * @param state is true if we have focus, false otherwise.
-     */
-    public static void styleFocus(Pane pane, String style, boolean state) {
-        if (state) {
-            pane.getStyleClass().remove(style);
-        } else {
-            if (!pane.getStyleClass().contains(style)) {
-                pane.getStyleClass().add(style);
-            }
-        }
-    }
-
-
 
     /************************************************************************
      * Support code for the Initialization of the Model.
@@ -100,7 +83,7 @@ public class Model {
 
         initializeCheckBoxes();
         initializeControls();
-        initializeStatusLine();
+        initializeEarthCanvas();
     }
 
     /**
@@ -143,7 +126,7 @@ public class Model {
         for (int i = 1; i <=8; ++i) {
             setBirthCheck(i, false);
         }
-        setBirthCheck(2, true);
+        setBirthCheck(3, true);
 
         initSpeed();
         initSize();
@@ -350,13 +333,13 @@ public class Model {
 
 
     /************************************************************************
-     * Support code for "Status Line" panel.
+     * Support code for "Earth" canvas.
      */
 
     /**
-     * Initialize "Status Line" panel.
+     * Initialize "Earth" canvas.
      */
-    private void initializeStatusLine() {
+    private void initializeEarthCanvas() {
     }
 
 
