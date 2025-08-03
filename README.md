@@ -1,16 +1,40 @@
 # GameOfLife
-'GameOfLife' is a JavaFX application 'framework' that uses Maven, FXML and CSS.
+'GameOfLife' is a JavaFX implementation of Conway's Game of Life.
 
 **USE AT OWN RISK.**
 
 ## Overview
 This project has been set up as a Maven project that uses JavaFX, FXML and 
-CSS to render the GUI. Maven can be run from the command line as shown below.
+CSS to render the GUI.
+Maven can be run from the command line as shown below.
 Maven resolves dependencies and builds the application independently of an IDE.
 
-The intention of this application is to provide a 'framework' from which other
-applications can be derived. It includes a number of different controls as 
-examples that can be cloned and modified as needed.
+A description of 'Conway's Game of Life' can be found 
+[here](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life).
+
+There are three main sections to this application:
+ * the 'Rules' panel
+ * the 'Controls' panel
+ * the grid
+
+### The 'Rules' panel
+The 'Rules' panel contains numerous checkboxes.
+Initially these checkboxes reflect the standard rules for remaining alive and
+being born.
+However, these checkboxes allow the rules to be changed.
+The tool-tips indicate the current rule definition.
+
+### The 'Controls' panel
+The 'Controls' panel contains a number of buttons, most of which are self 
+explanitory.
+The 'Reset' button returns the rules, speed of evolution and cell size back to 
+the default values.
+
+### The Grid
+The grid is the chequered section which hosts the living cells.
+Mouse clicks toggle the cells between live and dead.
+Pressing the 'Play' button will cause the live cells to evolve using the 
+current rules.
 
 ## Dependencies
 'GameOfLife' is dependent on the following:
@@ -34,40 +58,13 @@ The following commands clone and execute the code:
 	cd GameOfLife/
 	mvn clean javafx:run
 
-## Customization
-Once cloned, the following files should be modified:
-  * README.md
-  * pom.xml
-  * src/main/java/phillockett65/GameOfLife/App.java
-  * src/main/java/phillockett65/GameOfLife/DataStore.java
-  * src/main/java/phillockett65/GameOfLife/Model.java
-  * src/main/java/phillockett65/GameOfLife/PrimaryController.java
-  * src/main/resources/phillockett65/GameOfLife/primary.fxml
-
-In the above files, the following changes need to be made:
-  * change all occurrences of 'GameOfLife' to the new Application name
-  * change all occurrences of 'phillockett65' to your domain
-
-Finally rename the directories/folders in the same way:
-  * change all occurrences of 'GameOfLife' to the new Application name
-  * change all occurrences of 'phillockett65' to your domain
-
-The GUI layout can be modified as desired by editing the 'primary.fxml' file. 
-The SceneBuilder application makes editing the layout easier than modifiying 
-'primary.fxml' directly.
-
-FXML also uses cascading style sheets for the presentation. To change the 
-colours and fonts used, edit the 'application.css' file.
-
 ## Points of interest
 This code has the following points of interest:
 
   * GameOfLife is a Maven project that uses JavaFX.
-  * GameOfLife provides multiple examples of different types of JavaFX controls.
   * GameOfLife is styled with CSS.
   * GameOfLife is structured as an MVC project (FXML being the Video component).
   * Multi stage initialization minimizes the need for null checks. 
   * Data persistence is provided by the Serializable DataStore object.
   * The GUI is implemented in FXML using SceneBuilder.
   * A static Debug object helps control diagnostic output.
-  * The Command Pattern is used to support an Undo/Redo mechanism.
