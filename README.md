@@ -29,6 +29,7 @@ The 'Controls' panel contains a number of buttons, most of which are self
 explanitory.
 The 'Reset' button returns the rules, speed of evolution and cell size back to 
 the default values.
+The 'Shadow' button displays the state of living cells in a more subtle manner.
 
 ### The Grid
 The grid is the chequered section which hosts the living cells.

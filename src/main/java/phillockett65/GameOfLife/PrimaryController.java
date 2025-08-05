@@ -290,6 +290,9 @@ public class PrimaryController {
     private Button rightButton;
 
     @FXML
+    private Button shadowButton;
+
+    @FXML
     private Button clearDataButton;
 
     @FXML
@@ -354,6 +357,22 @@ public class PrimaryController {
     }
 
     @FXML
+    private void shadowButtonActionPerformed(ActionEvent event) {
+        Debug.trace(DD, "shadowButtonActionPerformed() " + shadow);
+
+        if (shadow) {
+            shadowButton.setText("Shadow");
+            shadowButton.setTooltip(new Tooltip("Enter shadow mode"));
+            shadow = false;
+        } else {
+            shadowButton.setText("Normal");
+            shadowButton.setTooltip(new Tooltip("Return to normal display"));
+            shadow = true;
+        }
+        syncEarthCanvas();
+    }
+
+    @FXML
     private void clearDataButtonActionPerformed(ActionEvent event) {
         Debug.trace(DD, "clearDataButtonActionPerformed()");
         clearData();
@@ -386,6 +405,7 @@ public class PrimaryController {
      */
     private void initializeControls() {
         clearDataButton.setTooltip(new Tooltip("Caution! This irreversible action will reset the form data to default values"));
+        shadowButton.setTooltip(new Tooltip("Enter shadow mode"));
     }
 
 
@@ -397,6 +417,8 @@ public class PrimaryController {
     @FXML
     private VBox earth;
 
+    private boolean shadow = false;
+
     private void setFill(int x, int y, boolean state) {
         if (state) {
             gc.setFill(livingColor);
@@ -407,10 +429,22 @@ public class PrimaryController {
         }
     }
 
-    private void setCell(int x, int y, boolean state) {
+    private void setFillGhost(int x, int y, boolean state) {
+        boolean contrast = (x + y) % 2 == 0;
+        if (state) {
+            contrast = !contrast;
+        }
+
+        if (contrast) {
+            gc.setFill(contrastColor);
+        } else {
+            gc.setFill(baseColor);
+        }
+    }
+
+    private void setCell(int x, int y) {
 
         // Debug.trace(DD, "setCell() " + x + " " + y + " " + state);
-        setFill(x, y, state);
 
         final int size = model.getSize();
         final int xPos = model.getXPosition(x);
@@ -439,12 +473,25 @@ public class PrimaryController {
         final int xSquares = (int)width / size;
         final int ySquares = (int)height / size;
 
-        for (int yIndex = 0; yIndex <= ySquares; ++yIndex) {
-            int y = model.getY(yIndex);
-            for (int xIndex = 0; xIndex <= xSquares; ++xIndex) {
-                int x = model.getX(xIndex);
-                final boolean state = model.isLiving(x, y);
-                setCell(x, y, state);
+        if (shadow) {
+            for (int yIndex = 0; yIndex <= ySquares; ++yIndex) {
+                int y = model.getY(yIndex);
+                for (int xIndex = 0; xIndex <= xSquares; ++xIndex) {
+                    int x = model.getX(xIndex);
+                    final boolean state = model.isLiving(x, y);
+                    setFillGhost(x, y, state);
+                    setCell(x, y);
+                }
+            }
+        } else {
+            for (int yIndex = 0; yIndex <= ySquares; ++yIndex) {
+                int y = model.getY(yIndex);
+                for (int xIndex = 0; xIndex <= xSquares; ++xIndex) {
+                    int x = model.getX(xIndex);
+                    final boolean state = model.isLiving(x, y);
+                    setFill(x, y, state);
+                    setCell(x, y);
+                }
             }
         }
     }
@@ -452,11 +499,24 @@ public class PrimaryController {
     public void updateEarthCanvas(LinkedList<Integer> toggles) {
         Debug.trace(DD, "updateEarthCanvas() ");
 
-        for (Integer pos : toggles) {
-            final int x = Model.extractX(pos);
-            final int y = Model.extractY(pos);
-            final boolean state = model.isLiving(x, y);
-            setCell(x, y, state);
+        if (shadow) {
+            for (Integer pos : toggles) {
+                final int x = Model.extractX(pos);
+                final int y = Model.extractY(pos);
+                final boolean state = model.isLiving(x, y);
+                
+                setFillGhost(x, y, state);
+                setCell(x, y);
+            }
+        } else {
+            for (Integer pos : toggles) {
+                final int x = Model.extractX(pos);
+                final int y = Model.extractY(pos);
+                final boolean state = model.isLiving(x, y);
+                
+                setFill(x, y, state);
+                setCell(x, y);
+            }
         }
     }
 
@@ -485,7 +545,10 @@ public class PrimaryController {
         final int x = model.getX(xPos / size);
         final int y = model.getY(yPos / size);
         final boolean state = model.toggleSelected(x, y);
-        setFill(x, y, state);
+        if (shadow)
+            setFillGhost(x, y, state);
+        else
+            setFill(x, y, state);
 
         Debug.trace(DD, "setCellFromMouseClick() " + x + " " + y + " " + state);
 

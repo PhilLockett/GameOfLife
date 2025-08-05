@@ -18,8 +18,8 @@
           <ColumnConstraints hgrow="SOMETIMES" maxWidth="400.0" minWidth="40.0" prefWidth="400.0" />
         </columnConstraints>
         <rowConstraints>
-          <RowConstraints maxHeight="315.0" minHeight="315.0" prefHeight="315.0" vgrow="SOMETIMES" />
-          <RowConstraints maxHeight="245.0" minHeight="245.0" prefHeight="245.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="300.0" minHeight="300.0" prefHeight="300.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="270.0" minHeight="270.0" prefHeight="270.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
             <TitledPane collapsible="false" text="Rules">
@@ -74,19 +74,21 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
                         <Label GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                        <Button fx:id="clearDataButton" onAction="#clearDataButtonActionPerformed" prefWidth="65.0" text="Reset" GridPane.rowIndex="5" />
+                        <Button fx:id="clearDataButton" onAction="#clearDataButtonActionPerformed" prefWidth="65.0" text="Reset" GridPane.rowIndex="6" />
                         <Button fx:id="fasterButton" mnemonicParsing="false" onAction="#fasterButtonActionPerformed" prefWidth="65.0" text="Faster" GridPane.columnIndex="1" />
                         <Button fx:id="slowerButton" mnemonicParsing="false" onAction="#slowerButtonActionPerformed" prefWidth="65.0" text="Slower" GridPane.halignment="RIGHT" />
                         <Button fx:id="biggerButton" mnemonicParsing="false" onAction="#biggerButtonActionPerformed" prefWidth="65.0" text="Bigger" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Button fx:id="smallerButton" mnemonicParsing="false" onAction="#smallerButtonActionPerformed" prefWidth="65.0" text="Smaller" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                        <Button fx:id="playButton" mnemonicParsing="false" onAction="#playButtonActionPerformed" prefWidth="65.0" text="Play" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+                        <Button fx:id="playButton" mnemonicParsing="false" onAction="#playButtonActionPerformed" prefWidth="65.0" text="Play" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
                         <Button fx:id="leftButton" mnemonicParsing="false" onAction="#leftButtonActionPerformed" prefWidth="65.0" text="Left" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
                         <Button fx:id="upButton" mnemonicParsing="false" onAction="#upButtonActionPerformed" prefWidth="65.0" text="Up" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
                         <Button fx:id="rightButton" mnemonicParsing="false" onAction="#rightButtonActionPerformed" prefWidth="65.0" text="Right" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                         <Button fx:id="downButton" mnemonicParsing="false" onAction="#downButtonActionPerformed" prefWidth="65.0" text="Down" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+                        <Button fx:id="shadowButton" mnemonicParsing="false" onAction="#shadowButtonActionPerformed" prefWidth="65.0" text="Shadow" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
                      </children>
                   </GridPane>
                </content>
