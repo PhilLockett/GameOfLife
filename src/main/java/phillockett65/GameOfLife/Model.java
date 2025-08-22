@@ -377,7 +377,7 @@ public class Model {
     public double getEarthWidth() {
         double width = getScene().getWidth();
         
-        return width - 204;
+        return width - (160 + 4);
     }
 
     public double getEarthHeight() {

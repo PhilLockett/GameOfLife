@@ -2,7 +2,7 @@
 
 .root{
     -main-back-col: #303030;
-    -main-fore-col: #e8e8e8;
+    -main-fore-col: white;
     -fx-background-color: -main-back-col;
 }
 
@@ -51,7 +51,7 @@
     -fx-background-color: -main-fore-col;
 }
 .content{
-    -fx-background-color: #080808;
+    -fx-background-color: black;
 	-fx-border-color: cyan;
 	-fx-border-insets: 1;
 }
