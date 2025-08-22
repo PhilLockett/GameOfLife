@@ -6,40 +6,33 @@
     -fx-background-color: -main-back-col;
 }
 
-.top-bar{
-    -fx-background-color: linear-gradient(to bottom, #505050, #303030);
-}
-
-.top-bar:hover{
-    -fx-background-color: linear-gradient(to bottom, #606060, #404040);
-}
-
-.unfocussed-root{
-    -fx-border-color: grey;
-}
-
-.unfocussed-bar{
-    -fx-background-color: linear-gradient(to bottom, #404040, #202020);
-}
-
-.top-bar-icon{
-    -fx-stroke: white;
-}
-
-.top-bar-icon:hover{
-    -fx-background-color: red;
-}
-
-.top-bar, .heading{
+.heading{
     -fx-font-size: 15;
-    -fx-text-fill: #e8e8e8;
-    -fx-font-weight: bold;
-}
-
-.label, .check-box, .radio-button{
     -fx-text-fill: -main-fore-col;
     -fx-font-weight: bold;
 }
+
+.label, .check-box{
+    -fx-text-fill: -main-fore-col;
+    -fx-font-weight: bold;
+}
+
+.check-box .box, .check-box .mark{
+    -fx-background-color: #6662BB;
+}
+
+.check-box .box{
+    -fx-background-radius: 4;
+}
+
+.check-box:selected .box{
+    -fx-background-color: white;
+}
+
+.check-box:selected .mark{
+    -fx-background-color: #26227B;
+}
+
 
 .titled-pane{
     -fx-text-fill: -main-fore-col;
@@ -57,120 +50,16 @@
     -fx-text-fill: black;
     -fx-background-color: -main-fore-col;
 }
-.text-field:readonly{
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-background-color: #808080;
-}
-.text-field{
-    -fx-text-fill: #808080;
-    -fx-font-weight: bold;
-    -fx-background-color: -main-fore-col;
-}
-.text-area{
-    -fx-text-fill: -main-fore-col;
-}
 .content{
     -fx-background-color: #080808;
-	-fx-border-color: yellow;
+	-fx-border-color: cyan;
 	-fx-border-insets: 1;
 }
-.spinner{
-    -fx-background-color: #282828;
-}
 
-.combo-box, .choice-box, .color-picker, .button{
-    -fx-background-color: linear-gradient(to bottom, #BB6662, #7B2622);
+.button{
+    -fx-background-color: linear-gradient(to bottom, #6662BB, #26227B);
     -fx-text-fill: -main-fore-col;
     -fx-font-weight: bold;
-    -fx-background-radius: 12;
-}
-.toggle-button:selected{
-    -fx-background-color: green;
-    -fx-text-fill: -main-fore-col;
-    -fx-font-weight: bold;
-    -fx-background-radius: 12;
-}
-.toggle-button{
-    -fx-background-color: red;
-    -fx-text-fill: -main-fore-col;
-    -fx-font-weight: bold;
-    -fx-background-radius: 12;
-}
-.context-menu, .menu-item:focused{
-    -fx-background-color: #9B4642;
-    -fx-text-fill: -main-fore-col;
-    -fx-font-weight: bold;
-}
-.menu-bar{
-    -fx-background-color: transparent;
-    -fx-text-fill: #e8e8e8;
-    -fx-font-weight: bold;
-}
-.menu-button:hover, .menu-button:showing, .menu-item:hover{
-    -fx-background-color: #7B2622;
-    -fx-text-fill: #e8e8e8;
-    -fx-font-weight: bold;
+    -fx-background-radius: 4;
 }
 
-.increment-arrow-button{
-    -fx-background-radius: 0 12 0 0;
-    -fx-background-color: linear-gradient(to bottom, #BB6662, #9B4642);
-}
-.decrement-arrow-button{
-    -fx-background-radius: 0 0 12 0;
-    -fx-background-color: linear-gradient(to bottom, #9B4642, #7B2622);
-}
-.increment-arrow, .decrement-arrow, .arrow{
-    -fx-background-color: -main-fore-col;
-}
-
-.imageButton{
-    -fx-background-color: null;
-    -fx-text-fill: null;
-}
-
-.progress-bar{
-    -fx-accent: #9B4642;
-}
-
-.table-view{
-    -fx-background-color: black;
-    -fx-font-weight: bold;
-}
-.column-header, .filler{
-    -fx-background-color: #9B4642;
-    -fx-font-weight: bold;
-}
-
-.list-view{
-    -fx-font-weight: bold;
-}
-.combo-box .text-input{
-    -fx-font-weight: bold;
-    -fx-background-color: linear-gradient(to bottom, #BB6662, #7B2622);
-}
-.combo-box .arrow-button{
-    -fx-background-color: linear-gradient(to bottom, #BB6662, #7B2622);
-}
-
-.list-cell{
-    -fx-font-weight: bold;
-}
-
-.list-cell:hover{
-    -fx-text-fill: -main-fore-col;
-    -fx-background-color: #BB6662;
-}
-.list-cell:selected{
-    -fx-text-fill: -main-fore-col;
-    -fx-background-color: linear-gradient(to bottom, #BB6662, #7B2622);
-}
-/*
-.list-cell:even{
-    -fx-background-color: #f8f8f8;
-}
-.list-cell:odd{
-    -fx-background-color: -main-fore-col;
-}
-*/
