@@ -22,7 +22,9 @@
 }
 
 .check-box .box{
-    -fx-background-radius: 4;
+    -fx-background-radius: 2;
+    -fx-border-radius: 2;
+    -fx-border-color: white;
 }
 
 .check-box:selected .box{
@@ -57,9 +59,11 @@
 }
 
 .button{
-    -fx-background-color: linear-gradient(to bottom, #6662BB, #26227B);
+    -fx-background-color: linear-gradient(to bottom, #46429B, #6662BB 35%, #26227B 85%);
     -fx-text-fill: -main-fore-col;
     -fx-font-weight: bold;
-    -fx-background-radius: 4;
+    -fx-background-radius: 2;
+    -fx-border-radius: 2;
+    -fx-border-color: silver;
 }
 
